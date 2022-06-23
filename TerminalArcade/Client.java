@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+//https://www.youtube.com/watch?v=gLfuZrrfKes
 public class Client{
     private Socket socket;
     private BufferedReader in;
@@ -33,6 +34,8 @@ public class Client{
                 out.write(username + ": " + msg);
                 out.newLine();
                 out.flush();
+                System.out.print(msg);
+                Chat.add(msg);
             }
             scan.close();
         }catch (IOException e){
@@ -49,6 +52,7 @@ public class Client{
                     try{
                         msgAll = in.readLine();
                         System.out.println(msgAll);
+                        Chat.add(msgAll);
                     } catch(IOException e){
                         close(socket, in, out);
                     }
@@ -73,15 +77,28 @@ public class Client{
         }
     }
 
-    public static void main(String[] args) throws IOException{
-        Scanner scan = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scan.nextLine();
-        Socket socket = new Socket("127.0.0.1", 65432);
-        Client client = new Client(socket, username);
-        client.listen();
-        client.send();
-        scan.close();
+    public static void sendMessage(String msg){
+        System.out.println(msg);
+        Chat.add(msg);
+    }
+
+    public static void makeClient() throws IOException{
+        new Thread(new Runnable() {
+            @Override
+            public void run(){
+                try{
+                    Scanner scan = new Scanner(System.in);
+                    String username = scan.nextLine();
+                    Socket socket = new Socket("127.0.0.1", 65432);
+                    Client client = new Client(socket, username);
+                    client.listen();
+                    client.send();
+                    scan.close();
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
     
